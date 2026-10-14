@@ -1,20 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Instagram 해시태그 검색 데모{% endblock %}
+{% block title %}Instagram - Hashtag search{% endblock %}
 {% block content %}
-  <h1>Instagram 해시태그 검색 데모</h1>
+  <h1>Flow 2: Instagram</h1>
 
   {% if warning %}
     <div class="notice warn">{{ warning }}</div>
   {% endif %}
 
   {% if not logged_in %}
-    <p class="lead">Instagram 해시태그 검색은 Facebook Login 경로를 사용합니다. 아래 버튼으로 로그인하세요.</p>
-    <a class="btn btn-facebook" href="{{ url_for('facebook_login') }}">Facebook으로 로그인</a>
+    <div class="caption">
+      <strong>Step 1 of 3 - Log in with Facebook</strong>
+      Instagram's hashtag search is available through Facebook Login. The user logs in with Facebook and is asked to grant: <code>pages_show_list</code>, <code>pages_read_engagement</code> and <code>instagram_basic</code>. The app also uses the <em>Instagram Public Content Access</em> feature for the hashtag search in step 3.
+    </div>
+    <a class="btn btn-facebook" href="{{ url_for('facebook_login') }}">Log in with Facebook</a>
   {% else %}
-    <p class="lead">병원 이름으로 검색해보세요. <a href="{{ url_for('instagram_pages') }}">← 페이지 다시 선택</a></p>
+    <div class="caption">
+      <strong>Step 3 of 3 - Feature shown: Instagram Public Content Access</strong>
+      Using the Instagram account linked to the Page chosen in step 2, the app calls <code>GET /ig_hashtag_search</code> and <code>GET /{hashtag-id}/top_media</code> to show public Instagram posts for the hashtag typed below. The hospital's communications team uses these results to see what the public is posting about the hospital.
+    </div>
+
+    <p class="lead">
+      Connected Page: <strong>{{ session.get('ig_page_name') or '-' }}</strong>
+      &middot; Instagram account: <strong>{% if session.get('ig_username') %}@{{ session.get('ig_username') }}{% else %}-{% endif %}</strong>
+      &middot; <a href="{{ url_for('instagram_pages') }}">&larr; Change Page</a>
+    </p>
     <form class="search-form" method="post" action="{{ url_for('instagram_search') }}">
-      <input type="text" name="keyword" placeholder="예: 일산차병원" value="{{ keyword or '' }}" required>
-      <button type="submit" class="btn btn-primary">검색</button>
+      <input type="text" name="keyword" placeholder="Hashtag, e.g. 일산차병원" value="{{ keyword or '' }}" required>
+      <button type="submit" class="btn btn-primary">Search</button>
     </form>
 
     {% if error %}
@@ -23,27 +35,28 @@
 
     {% if searched and not error %}
       {% if results %}
+        <h2 class="section-title">Public Instagram posts for #{{ keyword }}</h2>
         <div class="result-grid">
           {% for item in results %}
             <article class="card">
               {% if item.media_url %}
                 <div class="card-media">
-                  <img src="{{ item.media_url }}" alt="게시물 이미지" loading="lazy">
+                  <img src="{{ item.media_url }}" alt="Post image" loading="lazy">
                 </div>
               {% endif %}
               <div class="card-meta">
                 <span class="timestamp">{{ item.timestamp or '' }}</span>
               </div>
-              <p class="card-text">{{ item.caption or '(캡션 없음)' }}</p>
+              <p class="card-text">{{ item.caption or '(no caption)' }}</p>
               {% if item.permalink %}
-                <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">원문 보기 ↗</a>
+                <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">View original post &nearr;</a>
               {% endif %}
             </article>
           {% endfor %}
         </div>
       {% else %}
         <div class="empty-state">
-          <p>검색 결과가 없습니다.</p>
+          <p>No results found.</p>
         </div>
       {% endif %}
     {% endif %}

@@ -78,6 +78,18 @@ def _is_placeholder(value):
 CONFIG = load_config()
 
 app = Flask(__name__)
+
+
+@app.errorhandler(requests.RequestException)
+def handle_network_error(exc):
+    return render_template(
+        "error.html",
+        title="Temporary network problem",
+        message="A request to the Meta API timed out or failed. Please go back and try again.",
+        back_url=request.referrer or url_for("index"),
+    ), 502
+
+
 app.secret_key = (
     CONFIG.get("flask_secret_key")
     if not _is_placeholder(CONFIG.get("flask_secret_key"))
@@ -100,9 +112,8 @@ def _config_warning(provider_key):
     missing = [k for k in ("app_id", "app_secret", "redirect_uri") if _is_placeholder(cfg.get(k))]
     if missing:
         return (
-            f"demo_config.json 의 '{provider_key}' 항목 중 아직 값이 채워지지 않은 "
-            f"필드가 있습니다: {', '.join(missing)}. README.md를 참고해 값을 채운 뒤 "
-            "Flask 서버를 다시 시작하세요."
+            f"Some fields for '{provider_key}' are not configured yet: {', '.join(missing)}. "
+            "Set them in demo_config.json or as environment variables and restart the server."
         )
     return None
 
@@ -146,7 +157,7 @@ def threads_callback():
     if error:
         return render_template(
             "error.html",
-            title="Threads 로그인 실패",
+            title="Threads login failed",
             message=request.args.get("error_description", error),
             back_url=url_for("threads_home"),
         )
@@ -155,8 +166,8 @@ def threads_callback():
     if not state or state != session.get("threads_oauth_state"):
         return render_template(
             "error.html",
-            title="Threads 로그인 실패",
-            message="state 값이 일치하지 않습니다(요청 위조 방지 검증 실패). 처음부터 다시 시도하세요.",
+            title="Threads login failed",
+            message="The state value did not match (CSRF check failed). Please start again.",
             back_url=url_for("threads_home"),
         )
 
@@ -164,8 +175,8 @@ def threads_callback():
     if not code:
         return render_template(
             "error.html",
-            title="Threads 로그인 실패",
-            message="인가 코드(code)를 받지 못했습니다.",
+            title="Threads login failed",
+            message="No authorization code was received.",
             back_url=url_for("threads_home"),
         )
 
@@ -184,8 +195,8 @@ def threads_callback():
     if resp.status_code != 200:
         return render_template(
             "error.html",
-            title="Threads 토큰 교환 실패",
-            message=f"응답 코드 {resp.status_code}: {resp.text[:500]}",
+            title="Threads token exchange failed",
+            message=f"Response {resp.status_code}: {resp.text[:500]}",
             back_url=url_for("threads_home"),
         )
 
@@ -215,7 +226,7 @@ def threads_profile():
     if profile_resp.status_code == 200:
         profile = profile_resp.json()
     else:
-        errors.append(f"프로필 조회 실패 (status {profile_resp.status_code}): {profile_resp.text[:500]}")
+        errors.append(f"Profile request failed (status {profile_resp.status_code}): {profile_resp.text[:500]}")
 
     media_resp = requests.get(
         f"{THREADS_GRAPH_BASE}/me/threads",
@@ -229,7 +240,7 @@ def threads_profile():
     if media_resp.status_code == 200:
         media = media_resp.json().get("data", [])
     else:
-        errors.append(f"내 게시물 조회 실패 (status {media_resp.status_code}): {media_resp.text[:500]}")
+        errors.append(f"Own posts request failed (status {media_resp.status_code}): {media_resp.text[:500]}")
 
     return render_template("threads_profile.html", profile=profile, media=media, errors=errors)
 
@@ -262,7 +273,7 @@ def threads_search():
         if resp.status_code == 200:
             results = resp.json().get("data", [])
         else:
-            error = f"검색 API 호출 실패 (status {resp.status_code}): {resp.text[:500]}"
+            error = f"Search request failed (status {resp.status_code}): {resp.text[:500]}"
 
     return render_template(
         "threads.html",
@@ -316,7 +327,7 @@ def facebook_callback():
     if error:
         return render_template(
             "error.html",
-            title="Facebook 로그인 실패",
+            title="Facebook login failed",
             message=request.args.get("error_description", error),
             back_url=url_for("instagram_home"),
         )
@@ -325,8 +336,8 @@ def facebook_callback():
     if not state or state != session.get("fb_oauth_state"):
         return render_template(
             "error.html",
-            title="Facebook 로그인 실패",
-            message="state 값이 일치하지 않습니다(요청 위조 방지 검증 실패). 처음부터 다시 시도하세요.",
+            title="Facebook login failed",
+            message="The state value did not match (CSRF check failed). Please start again.",
             back_url=url_for("instagram_home"),
         )
 
@@ -334,8 +345,8 @@ def facebook_callback():
     if not code:
         return render_template(
             "error.html",
-            title="Facebook 로그인 실패",
-            message="인가 코드(code)를 받지 못했습니다.",
+            title="Facebook login failed",
+            message="No authorization code was received.",
             back_url=url_for("instagram_home"),
         )
 
@@ -353,8 +364,8 @@ def facebook_callback():
     if resp.status_code != 200:
         return render_template(
             "error.html",
-            title="Facebook 토큰 교환 실패",
-            message=f"응답 코드 {resp.status_code}: {resp.text[:500]}",
+            title="Facebook token exchange failed",
+            message=f"Response {resp.status_code}: {resp.text[:500]}",
             back_url=url_for("instagram_home"),
         )
 
@@ -372,7 +383,7 @@ def _fetch_managed_pages(access_token):
         timeout=15,
     )
     if resp.status_code != 200:
-        return [], f"관리 페이지 목록 조회 실패 (status {resp.status_code}): {resp.text[:500]}"
+        return [], f"Managed Pages request failed (status {resp.status_code}): {resp.text[:500]}"
 
     pages = []
     for page in resp.json().get("data", []):
@@ -394,7 +405,7 @@ def _fetch_page_instagram_account(access_token, page_id):
         timeout=15,
     )
     if resp.status_code != 200:
-        return None, None, f"페이지 조회 실패 (status {resp.status_code}): {resp.text[:500]}"
+        return None, None, f"Page request failed (status {resp.status_code}): {resp.text[:500]}"
     ig = resp.json().get("instagram_business_account") or {}
     return ig.get("id"), ig.get("username"), None
 
@@ -413,12 +424,12 @@ def instagram_pages():
     if not pages and not _is_placeholder(fallback_page_id):
         ig_id, ig_username, fb_error = _fetch_page_instagram_account(access_token, fallback_page_id)
         if not fb_error:
-            pages = [{"id": fallback_page_id, "name": f"페이지 {fallback_page_id}", "ig_id": ig_id, "ig_username": ig_username}]
+            pages = [{"id": fallback_page_id, "name": f"Page {fallback_page_id}", "ig_id": ig_id, "ig_username": ig_username}]
             fallback_used = True
         else:
             error = (error + " / " if error else "") + fb_error
 
-    session["ig_pages"] = {p["id"]: p["ig_id"] for p in pages}
+    session["ig_pages"] = {p["id"]: [p["ig_id"], p["name"], p["ig_username"]] for p in pages}
     return render_template("instagram_pages.html", pages=pages, error=error, fallback_used=fallback_used)
 
 
@@ -432,16 +443,18 @@ def instagram_select_page():
     if page_id not in pages:
         return redirect(url_for("instagram_pages"))
 
-    ig_user_id = pages[page_id]
+    ig_user_id, page_name, ig_username = pages[page_id]
     if not ig_user_id:
         return render_template(
             "error.html",
-            title="Instagram 계정 없음",
-            message="선택한 페이지에 연결된 Instagram 비즈니스/크리에이터 계정이 없습니다.",
+            title="No Instagram account",
+            message="The selected Page has no linked Instagram professional account.",
             back_url=url_for("instagram_pages"),
         )
 
     session["ig_user_id"] = ig_user_id
+    session["ig_page_name"] = page_name
+    session["ig_username"] = ig_username
     return redirect(url_for("instagram_search"))
 
 
@@ -470,7 +483,7 @@ def instagram_search():
             timeout=15,
         )
         if hashtag_resp.status_code != 200:
-            error = f"해시태그 검색 실패 (status {hashtag_resp.status_code}): {hashtag_resp.text[:500]}"
+            error = f"Hashtag search failed (status {hashtag_resp.status_code}): {hashtag_resp.text[:500]}"
         else:
             hashtag_data = hashtag_resp.json().get("data", [])
             if hashtag_data:
@@ -484,7 +497,7 @@ def instagram_search():
                     timeout=15,
                 )
                 if media_resp.status_code != 200:
-                    error = f"게시물 조회 실패 (status {media_resp.status_code}): {media_resp.text[:500]}"
+                    error = f"Media request failed (status {media_resp.status_code}): {media_resp.text[:500]}"
                 else:
                     results = media_resp.json().get("data", [])
 

@@ -1,20 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Threads 검색 데모{% endblock %}
+{% block title %}Threads - Keyword search{% endblock %}
 {% block content %}
-  <h1>Threads 검색 데모</h1>
+  <h1>Flow 1: Threads</h1>
 
   {% if warning %}
     <div class="notice warn">{{ warning }}</div>
   {% endif %}
 
   {% if not logged_in %}
-    <p class="lead">아래 버튼으로 Threads 계정에 로그인하면 검색 화면으로 이동합니다.</p>
-    <a class="btn btn-threads" href="{{ url_for('threads_login') }}">Threads로 로그인</a>
+    <div class="caption">
+      <strong>Step 1 of 3 - Log in with Threads</strong>
+      The user logs in with their Threads account and is asked to grant this app two permissions: <code>threads_basic</code> (read the user's profile and own posts) and <code>threads_keyword_search</code> (search public posts by keyword).
+    </div>
+    <a class="btn btn-threads" href="{{ url_for('threads_login') }}">Log in with Threads</a>
   {% else %}
-    <p class="lead">병원 이름으로 검색해보세요. <a href="{{ url_for('threads_profile') }}">← 내 프로필</a></p>
+    <div class="caption">
+      <strong>Step 3 of 3 - Permission shown: threads_keyword_search</strong>
+      After the user logged in and granted access, the app calls <code>GET /keyword_search</code> with the keyword typed below and shows the public Threads posts that are returned. The hospital's communications team uses these results to see what the public is saying about the hospital.
+    </div>
+
+    <p class="lead">Search public Threads posts. <a href="{{ url_for('threads_profile') }}">&larr; Back to my profile</a></p>
     <form class="search-form" method="post" action="{{ url_for('threads_search') }}">
-      <input type="text" name="keyword" placeholder="예: 일산차병원" value="{{ keyword or '' }}" required>
-      <button type="submit" class="btn btn-primary">검색</button>
+      <input type="text" name="keyword" placeholder="Keyword, e.g. 일산차병원" value="{{ keyword or '' }}" required>
+      <button type="submit" class="btn btn-primary">Search</button>
     </form>
 
     {% if error %}
@@ -23,23 +31,24 @@
 
     {% if searched and not error %}
       {% if results %}
+        <h2 class="section-title">Public Threads posts for "{{ keyword }}"</h2>
         <div class="result-grid">
           {% for item in results %}
             <article class="card">
               <div class="card-meta">
-                <span class="username">@{{ item.username or '알 수 없음' }}</span>
+                <span class="username">@{{ item.username or 'unknown' }}</span>
                 <span class="timestamp">{{ item.timestamp or '' }}</span>
               </div>
-              <p class="card-text">{{ item.text or '(텍스트 없음)' }}</p>
+              <p class="card-text">{{ item.text or '(no text)' }}</p>
               {% if item.permalink %}
-                <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">원문 보기 ↗</a>
+                <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">View original post &nearr;</a>
               {% endif %}
             </article>
           {% endfor %}
         </div>
       {% else %}
         <div class="empty-state">
-          <p>검색 결과가 없습니다.</p>
+          <p>No results found.</p>
         </div>
       {% endif %}
     {% endif %}

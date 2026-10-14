@@ -1,27 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Threads 프로필{% endblock %}
+{% block title %}Threads - Connected profile{% endblock %}
 {% block content %}
-  <h1>Threads 로그인 완료</h1>
-  <p class="lead">threads_basic 권한으로 가져온 내 프로필과 게시물입니다.</p>
+  <h1>Flow 1: Threads</h1>
+
+  <div class="caption">
+    <strong>Step 2 of 3 - Permission shown: threads_basic</strong>
+    Login succeeded and the user granted access. The app now reads the connected account live from the Threads API (<code>GET /me</code> for name, bio and ID, and <code>GET /me/threads</code> for the user's own posts), so the user can confirm which Threads account is linked before searching.
+  </div>
 
   {% for e in errors %}
     <div class="notice error">{{ e }}</div>
   {% endfor %}
 
   {% if profile %}
+    <h2 class="section-title">Connected Threads account</h2>
     <section class="card profile-card">
       {% if profile.threads_profile_picture_url %}
-        <img class="avatar" src="{{ profile.threads_profile_picture_url }}" alt="프로필 사진">
+        <img class="avatar" src="{{ profile.threads_profile_picture_url }}" alt="Profile picture">
       {% endif %}
       <div>
-        <div class="profile-name">{{ profile.name or '(이름 없음)' }}</div>
-        <div class="profile-sub">@{{ profile.username or '-' }} · ID {{ profile.id }}</div>
-        <p class="card-text">{{ profile.threads_biography or '(소개 없음)' }}</p>
+        <div class="profile-name">Name: {{ profile.name or '(not set)' }}</div>
+        <div class="profile-sub">Username: @{{ profile.username or '-' }} &middot; Threads user ID: {{ profile.id }}</div>
+        <p class="card-text">Bio: {{ profile.threads_biography or '(no bio)' }}</p>
       </div>
     </section>
   {% endif %}
 
-  <h2 class="section-title">내 게시물</h2>
+  <h2 class="section-title">This account's recent posts</h2>
   {% if media %}
     <div class="result-grid">
       {% for item in media %}
@@ -31,20 +36,20 @@
             <span class="timestamp">{{ item.timestamp or '' }}</span>
           </div>
           {% if item.media_url and item.media_type == 'IMAGE' %}
-            <div class="card-media"><img src="{{ item.media_url }}" alt="게시물 이미지" loading="lazy"></div>
+            <div class="card-media"><img src="{{ item.media_url }}" alt="Post image" loading="lazy"></div>
           {% endif %}
-          <p class="card-text">{{ item.text or '(텍스트 없음)' }}</p>
+          <p class="card-text">{{ item.text or '(no text)' }}</p>
           {% if item.permalink %}
-            <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">원문 보기 ↗</a>
+            <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">View original post &nearr;</a>
           {% endif %}
         </article>
       {% endfor %}
     </div>
   {% else %}
-    <div class="empty-state"><p>표시할 게시물이 없습니다.</p></div>
+    <div class="empty-state"><p>No posts to show.</p></div>
   {% endif %}
 
   <div class="next-step">
-    <a class="btn btn-threads" href="{{ url_for('threads_search') }}">다음: 키워드 검색으로 이동 →</a>
+    <a class="btn btn-threads" href="{{ url_for('threads_search') }}">Next: Search public posts &rarr;</a>
   </div>
 {% endblock %}

@@ -1,20 +1,26 @@
 {% extends "base.html" %}
-{% block title %}App Review Demo - 홈{% endblock %}
+{% block title %}Social Mention Monitor - Home{% endblock %}
 {% block content %}
-  <h1>Meta App Review 데모</h1>
-  <p class="lead">두 가지 엔드투엔드 사용 흐름을 확인할 수 있습니다. 각 카드를 눌러 실제 로그인부터 검색 결과 표시까지 진행하세요.</p>
+  <h1>Social Mention Monitor</h1>
+
+  <div class="caption">
+    <strong>Use case</strong>
+    The communications team of Ilsan CHA Hospital uses this app to find <em>public</em> Threads and Instagram posts that mention the hospital, so staff can review public feedback and respond to it. The app only reads public content and the logged-in user's own account information. It does not post, message, or store any user content.
+  </div>
+
+  <p class="lead">Two end-to-end flows are shown below. Each starts with the user logging in and granting permissions.</p>
 
   <div class="flow-grid">
     <a class="flow-card" href="{{ url_for('threads_home') }}">
-      <h2>Threads 검색 데모</h2>
-      <p>Threads로 로그인 → 병원 이름 검색 → threads_keyword_search 결과를 카드로 표시</p>
-      <span class="cta">시작하기 →</span>
+      <h2>Flow 1: Threads</h2>
+      <p>Log in with Threads, review the connected profile (<code>threads_basic</code>), then search public posts by keyword (<code>threads_keyword_search</code>).</p>
+      <span class="cta">Start &rarr;</span>
     </a>
 
     <a class="flow-card" href="{{ url_for('instagram_home') }}">
-      <h2>Instagram 해시태그 검색 데모</h2>
-      <p>Facebook으로 로그인 → 병원 이름 검색 → ig_hashtag_search 결과를 카드로 표시</p>
-      <span class="cta">시작하기 →</span>
+      <h2>Flow 2: Instagram</h2>
+      <p>Log in with Facebook, choose a managed Page (<code>pages_show_list</code>), then search public Instagram posts by hashtag (Instagram Public Content Access).</p>
+      <span class="cta">Start &rarr;</span>
     </a>
   </div>
 {% endblock %}

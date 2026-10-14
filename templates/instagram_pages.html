@@ -1,35 +1,40 @@
 {% extends "base.html" %}
-{% block title %}관리 중인 페이지{% endblock %}
+{% block title %}Instagram - Choose a Page{% endblock %}
 {% block content %}
-  <h1>Facebook 로그인 완료</h1>
-  <p class="lead">pages_show_list 권한으로 가져온, 내가 관리 중인 Facebook 페이지 목록입니다. 해시태그 검색에 사용할 페이지를 선택하세요.</p>
+  <h1>Flow 2: Instagram</h1>
+
+  <div class="caption">
+    <strong>Step 2 of 3 - Permissions shown: pages_show_list, pages_read_engagement, instagram_basic</strong>
+    Login succeeded and the user granted access. The app calls <code>GET /me/accounts</code> (<code>pages_show_list</code>) to list the Facebook Pages this user manages. For each Page it reads the linked Instagram professional account (<code>pages_read_engagement</code> and <code>instagram_basic</code>). Instagram's hashtag search requires an Instagram professional account ID, and the user needs to choose which managed Page's account is used.
+  </div>
 
   {% if error %}
     <div class="notice error">{{ error }}</div>
   {% endif %}
   {% if fallback_used %}
-    <div class="notice warn">me/accounts 결과가 비어 있어 설정된 기본 페이지(facebook.page_id)로 대체했습니다.</div>
+    <div class="notice warn">The Page list was empty, so the default Page configured for this demo was used.</div>
   {% endif %}
 
+  <h2 class="section-title">Facebook Pages you manage</h2>
   {% if pages %}
     <div class="result-grid">
       {% for p in pages %}
         <article class="card page-card">
           <div>
-            <div class="profile-name">관리 중인 페이지: {{ p.name }}</div>
+            <div class="profile-name">Managed Page: {{ p.name }}</div>
             <div class="profile-sub">
-              페이지 ID {{ p.id }} ·
-              {% if p.ig_id %}연결된 Instagram: {% if p.ig_username %}@{{ p.ig_username }} {% endif %}({{ p.ig_id }}){% else %}연결된 Instagram 계정 없음{% endif %}
+              Page ID: {{ p.id }} &middot;
+              {% if p.ig_id %}Linked Instagram account: {% if p.ig_username %}@{{ p.ig_username }} {% endif %}(ID {{ p.ig_id }}){% else %}No linked Instagram account{% endif %}
             </div>
           </div>
           <form method="post" action="{{ url_for('instagram_select_page') }}">
             <input type="hidden" name="page_id" value="{{ p.id }}">
-            <button type="submit" class="btn btn-facebook">이 페이지로 계속 →</button>
+            <button type="submit" class="btn btn-facebook">Use this Page &rarr;</button>
           </form>
         </article>
       {% endfor %}
     </div>
   {% else %}
-    <div class="empty-state"><p>관리 중인 페이지가 없습니다.</p></div>
+    <div class="empty-state"><p>You do not manage any Pages.</p></div>
   {% endif %}
 {% endblock %}
