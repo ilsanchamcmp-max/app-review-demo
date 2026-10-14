@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}App Review Demo - 홈{% endblock %}
+{% block content %}
+  <h1>Meta App Review 데모</h1>
+  <p class="lead">두 가지 엔드투엔드 사용 흐름을 확인할 수 있습니다. 각 카드를 눌러 실제 로그인부터 검색 결과 표시까지 진행하세요.</p>
+
+  <div class="flow-grid">
+    <a class="flow-card" href="{{ url_for('threads_home') }}">
+      <h2>Threads 검색 데모</h2>
+      <p>Threads로 로그인 → 병원 이름 검색 → threads_keyword_search 결과를 카드로 표시</p>
+      <span class="cta">시작하기 →</span>
+    </a>
+
+    <a class="flow-card" href="{{ url_for('instagram_home') }}">
+      <h2>Instagram 해시태그 검색 데모</h2>
+      <p>Facebook으로 로그인 → 병원 이름 검색 → ig_hashtag_search 결과를 카드로 표시</p>
+      <span class="cta">시작하기 →</span>
+    </a>
+  </div>
+{% endblock %}

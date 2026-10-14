@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: app-review-demo
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 60
+    envVars:
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: THREADS_APP_ID
+        sync: false
+      - key: THREADS_APP_SECRET
+        sync: false
+      - key: THREADS_REDIRECT_URI
+        sync: false
+      - key: THREADS_SCOPE
+        value: threads_basic,threads_keyword_search
+      - key: FACEBOOK_APP_ID
+        sync: false
+      - key: FACEBOOK_APP_SECRET
+        sync: false
+      - key: FACEBOOK_REDIRECT_URI
+        sync: false
+      - key: FACEBOOK_SCOPE
+        value: instagram_basic,pages_show_list,pages_read_engagement,business_management
+      - key: FACEBOOK_PAGE_ID
+        value: "1266008319925722"

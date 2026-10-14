@@ -1,0 +1,16 @@
+{
+  "flask_secret_key": "REPLACE_WITH_RANDOM_SECRET_KEY",
+  "threads": {
+    "app_id": "REPLACE_WITH_THREADS_APP_ID",
+    "app_secret": "REPLACE_WITH_THREADS_APP_SECRET",
+    "redirect_uri": "REPLACE_WITH_HTTPS_REDIRECT_URI_FOR_THREADS",
+    "scope": "threads_basic,threads_keyword_search"
+  },
+  "facebook": {
+    "app_id": "REPLACE_WITH_META_APP_ID",
+    "app_secret": "REPLACE_WITH_META_APP_SECRET",
+    "redirect_uri": "REPLACE_WITH_HTTPS_REDIRECT_URI_FOR_FACEBOOK",
+    "scope": "instagram_basic,pages_show_list,pages_read_engagement,business_management",
+    "page_id": "1266008319925722"
+  }
+}

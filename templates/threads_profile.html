@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Threads 프로필{% endblock %}
+{% block content %}
+  <h1>Threads 로그인 완료</h1>
+  <p class="lead">threads_basic 권한으로 가져온 내 프로필과 게시물입니다.</p>
+
+  {% for e in errors %}
+    <div class="notice error">{{ e }}</div>
+  {% endfor %}
+
+  {% if profile %}
+    <section class="card profile-card">
+      {% if profile.threads_profile_picture_url %}
+        <img class="avatar" src="{{ profile.threads_profile_picture_url }}" alt="프로필 사진">
+      {% endif %}
+      <div>
+        <div class="profile-name">{{ profile.name or '(이름 없음)' }}</div>
+        <div class="profile-sub">@{{ profile.username or '-' }} · ID {{ profile.id }}</div>
+        <p class="card-text">{{ profile.threads_biography or '(소개 없음)' }}</p>
+      </div>
+    </section>
+  {% endif %}
+
+  <h2 class="section-title">내 게시물</h2>
+  {% if media %}
+    <div class="result-grid">
+      {% for item in media %}
+        <article class="card">
+          <div class="card-meta">
+            <span class="username">@{{ item.username or '' }}</span>
+            <span class="timestamp">{{ item.timestamp or '' }}</span>
+          </div>
+          {% if item.media_url and item.media_type == 'IMAGE' %}
+            <div class="card-media"><img src="{{ item.media_url }}" alt="게시물 이미지" loading="lazy"></div>
+          {% endif %}
+          <p class="card-text">{{ item.text or '(텍스트 없음)' }}</p>
+          {% if item.permalink %}
+            <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">원문 보기 ↗</a>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state"><p>표시할 게시물이 없습니다.</p></div>
+  {% endif %}
+
+  <div class="next-step">
+    <a class="btn btn-threads" href="{{ url_for('threads_search') }}">다음: 키워드 검색으로 이동 →</a>
+  </div>
+{% endblock %}

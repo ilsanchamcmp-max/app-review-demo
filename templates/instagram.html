@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Instagram 해시태그 검색 데모{% endblock %}
+{% block content %}
+  <h1>Instagram 해시태그 검색 데모</h1>
+
+  {% if warning %}
+    <div class="notice warn">{{ warning }}</div>
+  {% endif %}
+
+  {% if not logged_in %}
+    <p class="lead">Instagram 해시태그 검색은 Facebook Login 경로를 사용합니다. 아래 버튼으로 로그인하세요.</p>
+    <a class="btn btn-facebook" href="{{ url_for('facebook_login') }}">Facebook으로 로그인</a>
+  {% else %}
+    <p class="lead">병원 이름으로 검색해보세요. <a href="{{ url_for('instagram_pages') }}">← 페이지 다시 선택</a></p>
+    <form class="search-form" method="post" action="{{ url_for('instagram_search') }}">
+      <input type="text" name="keyword" placeholder="예: 일산차병원" value="{{ keyword or '' }}" required>
+      <button type="submit" class="btn btn-primary">검색</button>
+    </form>
+
+    {% if error %}
+      <div class="notice error">{{ error }}</div>
+    {% endif %}
+
+    {% if searched and not error %}
+      {% if results %}
+        <div class="result-grid">
+          {% for item in results %}
+            <article class="card">
+              {% if item.media_url %}
+                <div class="card-media">
+                  <img src="{{ item.media_url }}" alt="게시물 이미지" loading="lazy">
+                </div>
+              {% endif %}
+              <div class="card-meta">
+                <span class="timestamp">{{ item.timestamp or '' }}</span>
+              </div>
+              <p class="card-text">{{ item.caption or '(캡션 없음)' }}</p>
+              {% if item.permalink %}
+                <a class="card-link" href="{{ item.permalink }}" target="_blank" rel="noopener">원문 보기 ↗</a>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <p>검색 결과가 없습니다.</p>
+        </div>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endblock %}
